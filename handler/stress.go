@@ -18,6 +18,8 @@ import (
 	_ "github.com/Go-SQL-Driver/MySQL"
 )
 
+var conn *sql.DB
+
 type Stress struct {
 	config config.Config
 }
@@ -100,6 +102,30 @@ func (s *Stress) StressRDS(ctx context.Context, req *stress.Request, rsp *stress
 	}
 
 	stmt, _ := db.Prepare("DELETE FROM test")
+	stmt.Exec()
+	return nil
+}
+
+func (s *Stress) StressRDSIOPs(ctx context.Context, req *stress.Request, rsp *stress.Response) error {
+	if conn == nil {
+		var err error
+		conn, err = sql.Open("mysql", s.config.User+":"+s.config.Password+"@tcp("+s.config.Endpoint+")/"+s.config.Database+"?charset=utf8")
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+
+	for i := 0; i < s.config.Count/100; i++ {
+		stmt, err := conn.Prepare("INSERT test SET foo=?,bar=?")
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		stmt.Exec("abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghi", "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghi")
+	}
+
+	stmt, _ := conn.Prepare("DELETE FROM test")
 	stmt.Exec()
 	return nil
 }
