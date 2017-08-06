@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package go.micro.srv.bench;
+
+service Stress {
+	rpc StressCPU(Request) returns (Response) {}
+	rpc StressMemory(Request) returns (Response) {}
+	rpc StressIO(Request) returns (Response) {}
+	rpc StressNetwork(NetworkRequest) returns (NetworkResponse) {}
+
+	rpc StressRDS(Request) returns (Response) {}
+}
+
+message Response {
+	string message = 1;
+}
+
+message Request {
+
+}
+
+message NetworkRequest {
+	string message = 1;
+}
+
+message NetworkResponse {
+	string message = 1;
+}
